@@ -8,7 +8,9 @@ import {
   AlertTriangle,
   ArrowDownCircle,
   ArrowUpCircle,
-  FileBarChart,
+  Calendar,
+  Clock,
+  BarChart3,
 } from "lucide-react";
 import { useBranch } from "@/context/BranchContext";
 import { type StockMovement, type Part } from "@/types";
@@ -74,6 +76,7 @@ export default function DashboardPage() {
     recentIn: [],
     recentOut: [],
   });
+  const [currentTime, setCurrentTime] = useState("");
 
   const load = useCallback(async () => {
     if (!selectedBranch) return;
@@ -83,111 +86,152 @@ export default function DashboardPage() {
 
   useEffect(() => {
     load();
+    // Update time every minute
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }));
+    }, 1000);
+    setCurrentTime(new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }));
+    return () => clearInterval(timer);
   }, [load]);
 
   const { totalParts, lowStockCount, lowStockParts, recentIn, recentOut } = data;
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
-          {selectedBranch ? selectedBranch.name : "Select a branch from the sidebar"}
-        </p>
-      </div>
-
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Total Parts"
-          value={totalParts}
-          icon={Package}
-          description="All Denso products in catalogue"
-        />
-        <StatCard
-          title="Low Stock"
-          value={lowStockCount}
-          icon={AlertTriangle}
-          iconColor="text-red-600"
-          iconBg="bg-red-50"
-          description="Parts at or below minimum"
-          alert={lowStockCount > 0}
-        />
-        <StatCard
-          title="Recent Stock In"
-          value={recentIn.length}
-          icon={ArrowDownCircle}
-          iconColor="text-green-600"
-          iconBg="bg-green-50"
-          description="Last 5 deliveries"
-        />
-        <StatCard
-          title="Recent Stock Out"
-          value={recentOut.length}
-          icon={ArrowUpCircle}
-          iconColor="text-orange-600"
-          iconBg="bg-orange-50"
-          description="Last 5 usages / sales"
-        />
-      </div>
-
-      {/* Low Stock Alert */}
-      {lowStockParts.length > 0 && (
-        <div className="bg-white rounded-2xl border border-red-200 shadow-sm overflow-hidden">
-          <div className="flex items-center gap-2 px-5 py-4 border-b border-red-100 bg-red-50">
-            <AlertTriangle className="w-4 h-4 text-red-600" />
-            <h2 className="text-sm font-semibold text-red-700">Low Stock Alert</h2>
-            <span className="ml-auto text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded-full">
-              {lowStockParts.length} part{lowStockParts.length !== 1 ? "s" : ""}
-            </span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="max-w-7xl mx-auto p-6 lg:p-8 space-y-8">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div>
+            <div className="flex items-baseline gap-3 mb-2">
+              <h1 className="text-4xl font-bold text-gray-900">Dashboard</h1>
+              <span className="text-sm font-medium text-gray-500 px-3 py-1 bg-white rounded-full border border-gray-200">
+                {selectedBranch?.name || "No branch selected"}
+              </span>
+            </div>
+            <p className="text-gray-600">Monitor your inventory and stock movements at a glance</p>
           </div>
-          <div className="divide-y divide-red-50">
-            {lowStockParts.map((p) => (
-              <div key={p.id} className="flex items-center justify-between px-5 py-3 hover:bg-red-50 transition-colors">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">
-                    {p.product_name}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {p.part_number} · {p.category}
-                  </p>
-                </div>
-                <div className="ml-3 text-right shrink-0">
-                  <p className="text-sm font-bold text-red-600">Stock: {p.stock}</p>
-                  <p className="text-xs text-gray-400">Min: {p.min_stock}</p>
-                </div>
-              </div>
-            ))}
+          <div className="flex gap-4 text-sm text-gray-600">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-gray-400" />
+              <span>{new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-gray-400" />
+              <span>{currentTime}</span>
+            </div>
           </div>
         </div>
-      )}
 
-      {/* Activity Tables */}
+        
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <StatCard
+            title="Total Parts"
+            value={totalParts}
+            icon={Package}
+            iconColor="text-blue-600"
+            iconBg="bg-blue-50"
+            description="Active products"
+            trend={12}
+          />
+          <StatCard
+            title="Low Stock Alert"
+            value={lowStockCount}
+            icon={AlertTriangle}
+            iconColor="text-red-600"
+            iconBg="bg-red-50"
+            description="Needs attention"
+            alert={lowStockCount > 0}
+            trend={lowStockCount > 0 ? 5 : -10}
+          />
+          <StatCard
+            title="Stock Inbound"
+            value={recentIn.length}
+            icon={ArrowDownCircle}
+            iconColor="text-emerald-600"
+            iconBg="bg-emerald-50"
+            description="Recent deliveries"
+            trend={8}
+          />
+          <StatCard
+            title="Stock Outbound"
+            value={recentOut.length}
+            icon={ArrowUpCircle}
+            iconColor="text-amber-600"
+            iconBg="bg-amber-50"
+            description="Recent shipments"
+            trend={-3}
+          />
+        </div>
+
+        {/* Low Stock Alert Section */}
+        {lowStockParts.length > 0 && (
+          <div className="bg-white rounded-xl border border-red-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-red-100 bg-gradient-to-r from-red-50 to-orange-50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-red-900">Low Stock Alert</h2>
+                  <p className="text-xs text-red-700">Requires immediate attention</p>
+                </div>
+              </div>
+              <span className="text-sm font-bold text-white bg-red-600 px-3 py-1 rounded-full">
+                {lowStockParts.length}
+              </span>
+            </div>
+            <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+              {lowStockParts.map((p) => (
+                <div key={p.id} className="flex items-center justify-between px-6 py-4 hover:bg-red-50 transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-900 truncate">{p.product_name}</p>
+                    <div className="flex gap-2 mt-1">
+                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{p.part_number}</span>
+                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{p.category}</span>
+                    </div>
+                  </div>
+                  <div className="ml-4 text-right shrink-0">
+                    <p className="text-lg font-bold text-red-600">{p.stock}</p>
+                    <p className="text-xs text-gray-500">Min: {p.min_stock}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+      {/* Activity Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Stock In */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
-          <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-            <ArrowDownCircle className="w-4 h-4 text-green-600" />
-            <h2 className="text-sm font-semibold text-gray-700">Recent Stock In</h2>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-green-50">
+            <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+              <ArrowDownCircle className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-gray-900">Stock Inbound</h2>
+              <p className="text-xs text-gray-600">Recent deliveries</p>
+            </div>
           </div>
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-gray-100">
             {recentIn.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-8">
-                No stock in records yet
-              </p>
+              <div className="py-12 px-6 text-center">
+                <Package className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">No inbound stock yet</p>
+              </div>
             ) : (
               recentIn.map((m) => (
-                <div key={m.id} className="flex items-center justify-between px-5 py-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">
-                      {m.parts?.product_name ?? "—"}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {m.parts?.part_number} · {m.date}
-                    </p>
+                <div key={m.id} className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-900 truncate">{m.parts?.product_name || "Unknown"}</p>
+                    <div className="flex gap-2 mt-1">
+                      <span className="text-xs text-gray-500">{m.parts?.part_number || "N/A"}</span>
+                      <span className="text-xs text-gray-400">•</span>
+                      <span className="text-xs text-gray-500">{m.date}</span>
+                    </div>
                   </div>
-                  <span className="ml-3 text-sm font-semibold text-green-600 shrink-0">
+                  <span className="ml-4 inline-flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 font-bold text-sm shrink-0">
                     +{m.quantity}
                   </span>
                 </div>
@@ -197,28 +241,34 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Stock Out */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
-          <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-            <ArrowUpCircle className="w-4 h-4 text-orange-600" />
-            <h2 className="text-sm font-semibold text-gray-700">Recent Stock Out</h2>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50">
+            <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+              <ArrowUpCircle className="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-gray-900">Stock Outbound</h2>
+              <p className="text-xs text-gray-600">Recent shipments</p>
+            </div>
           </div>
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-gray-100">
             {recentOut.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-8">
-                No stock out records yet
-              </p>
+              <div className="py-12 px-6 text-center">
+                <Package className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">No outbound stock yet</p>
+              </div>
             ) : (
               recentOut.map((m) => (
-                <div key={m.id} className="flex items-center justify-between px-5 py-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">
-                      {m.parts?.product_name ?? "—"}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {m.parts?.part_number} · {m.date}
-                    </p>
+                <div key={m.id} className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-900 truncate">{m.parts?.product_name || "Unknown"}</p>
+                    <div className="flex gap-2 mt-1">
+                      <span className="text-xs text-gray-500">{m.parts?.part_number || "N/A"}</span>
+                      <span className="text-xs text-gray-400">•</span>
+                      <span className="text-xs text-gray-500">{m.date}</span>
+                    </div>
                   </div>
-                  <span className="ml-3 text-sm font-semibold text-orange-600 shrink-0">
+                  <span className="ml-4 inline-flex items-center justify-center w-10 h-10 rounded-lg bg-amber-100 text-amber-600 font-bold text-sm shrink-0">
                     -{m.quantity}
                   </span>
                 </div>
@@ -229,39 +279,60 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-        <h2 className="text-sm font-semibold text-gray-700 mb-3">Quick Actions</h2>
-        <div className="flex flex-wrap gap-3">
-          <a
-            href="/parts?action=add"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
-          >
-            <Package className="w-4 h-4" />
-            Add Part
-          </a>
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <h2 className="text-sm font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <a
             href="/stock?tab=in"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+            className="group relative overflow-hidden rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white p-4 transition-all duration-200 hover:shadow-lg"
           >
-            <ArrowDownCircle className="w-4 h-4" />
-            Stock In
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <ArrowDownCircle className="w-5 h-5" />
+              </div>
+              <span className="font-medium">Stock In</span>
+            </div>
+            <p className="text-xs text-white/80 mt-1">Record new delivery</p>
           </a>
           <a
             href="/stock?tab=out"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors"
+            className="group relative overflow-hidden rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white p-4 transition-all duration-200 hover:shadow-lg"
           >
-            <ArrowUpCircle className="w-4 h-4" />
-            Stock Out
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <ArrowUpCircle className="w-5 h-5" />
+              </div>
+              <span className="font-medium">Stock Out</span>
+            </div>
+            <p className="text-xs text-white/80 mt-1">Record usage/sale</p>
+          </a>
+          <a
+            href="/parts?action=add"
+            className="group relative overflow-hidden rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-4 transition-all duration-200 hover:shadow-lg"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <Package className="w-5 h-5" />
+              </div>
+              <span className="font-medium">Add Part</span>
+            </div>
+            <p className="text-xs text-white/80 mt-1">New product</p>
           </a>
           <a
             href="/reports"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
+            className="group relative overflow-hidden rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white p-4 transition-all duration-200 hover:shadow-lg"
           >
-            <FileBarChart className="w-4 h-4" />
-            Generate Report
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <BarChart3 className="w-5 h-5" />
+              </div>
+              <span className="font-medium">Reports</span>
+            </div>
+            <p className="text-xs text-white/80 mt-1">View analytics</p>
           </a>
         </div>
       </div>
+    </div>
     </div>
   );
 }
