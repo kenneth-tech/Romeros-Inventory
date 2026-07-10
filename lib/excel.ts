@@ -21,7 +21,7 @@ export function exportMonthlyReport(
     [`${MONTHS[month - 1].toUpperCase()} ${year}`],
     ["Romeros Car Aircon"],
     [],
-    ["Part Number", "Product Name", "Beginning", "Received", "Used / Sold", "Ending"],
+    ["Part Number", "Product Name", "Initial Inventory", "Received", "Used / Sold", "Final Inventory"],
     ...rows.map((r) => [
       r.part_number,
       r.product_name,
@@ -39,10 +39,10 @@ export function exportMonthlyReport(
   ws["!cols"] = [
     { wch: 15 }, // Part Number
     { wch: 32 }, // Product Name
-    { wch: 12 }, // Beginning
+    { wch: 18 }, // Initial Inventory
     { wch: 12 }, // Received
     { wch: 12 }, // Used / Sold
-    { wch: 12 }, // Ending
+    { wch: 18 }, // Final Inventory
   ];
 
   // Merge title cells A1:F1 and A2:F2

@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { FileBarChart, RefreshCw, Download } from "lucide-react";
-import { calculateMonthlyReport, saveReportMetadata } from "@/lib/reports";
+import { calculateMonthlyReport, saveReportMetadata, getDailyMonthlyReport } from "@/lib/reports";
 import { exportMonthlyReport } from "@/lib/excel";
+import { exportDailyMonthlyReport } from "@/lib/exportSnapshot";
 import { createClient } from "@/lib/supabase";
 import { useBranch } from "@/context/BranchContext";
 import type { MonthlyReportRow } from "@/types";
@@ -57,7 +58,7 @@ export default function ReportsPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Monthly Report</h1>
         <p className="text-sm text-gray-500 mt-0.5">
-          Denso inventory report — Beginning · Received · Used/Sold · Ending
+          Denso inventory report — Initial Inventory · Received · Used/Sold · Final Inventory
         </p>
       </div>
 
@@ -103,13 +104,33 @@ export default function ReportsPage() {
           </button>
 
           {generated && rows.length > 0 && (
-            <button
-              onClick={() => exportMonthlyReport(rows, month, year)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
-            >
-              <Download className="w-4 h-4" />
-              Export to Excel
-            </button>
+            <>
+              <button
+                onClick={() => exportMonthlyReport(rows, month, year)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Export Summary
+              </button>
+              <button
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    const dailyData = await getDailyMonthlyReport(month, year, selectedBranch!.id);
+                    await exportDailyMonthlyReport(dailyData, month, year);
+                  } catch (err) {
+                    setError(err instanceof Error ? err.message : "Failed to export daily report.");
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Export Daily Report
+              </button>
+            </>
           )}
         </div>
 
@@ -146,10 +167,10 @@ export default function ReportsPage() {
                   <tr className="bg-gray-50 border-b border-gray-100">
                     <th className="text-left px-4 py-3 font-medium text-gray-500">Part #</th>
                     <th className="text-left px-4 py-3 font-medium text-gray-500">Product Name</th>
-                    <th className="text-right px-4 py-3 font-medium text-gray-500">Beginning</th>
+                    <th className="text-right px-4 py-3 font-medium text-gray-500">Initial Inventory</th>
                     <th className="text-right px-4 py-3 font-medium text-blue-600">Received</th>
                     <th className="text-right px-4 py-3 font-medium text-orange-600">Used / Sold</th>
-                    <th className="text-right px-4 py-3 font-medium text-gray-700">Ending</th>
+                    <th className="text-right px-4 py-3 font-medium text-gray-700">Final Inventory</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">

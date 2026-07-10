@@ -20,6 +20,18 @@ export interface StockOutInput {
   date: string;
 }
 
+export interface StockOutMultipleInput {
+  lineItems: Array<{
+    id: string;
+    part_id: string;
+    quantity: number;
+  }>;
+  branch_id: string;
+  reference: string;
+  remarks: string;
+  date: string;
+}
+
 export type MovementWithPart = StockMovement & {
   parts: Pick<Part, "part_number" | "product_name"> | null;
   user: Pick<UserProfile, "id" | "first_name" | "last_name"> | null;
@@ -54,6 +66,26 @@ export async function insertStockOut(data: StockOutInput): Promise<void> {
     type: "OUT",
     user_id: userId,
   });
+  if (error) throw error;
+}
+
+export async function insertStockOutMultiple(data: StockOutMultipleInput): Promise<void> {
+  const supabase = createClient();
+  const userId = await getCurrentUserId();
+
+  // Create an entry for each line item
+  const records = data.lineItems.map((item) => ({
+    part_id: item.part_id,
+    branch_id: data.branch_id,
+    quantity: item.quantity,
+    reference: data.reference,
+    remarks: data.remarks,
+    date: data.date,
+    type: "OUT" as const,
+    user_id: userId,
+  }));
+
+  const { error } = await supabase.from("stock_movements").insert(records);
   if (error) throw error;
 }
 
