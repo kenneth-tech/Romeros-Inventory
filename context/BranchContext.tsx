@@ -8,6 +8,7 @@ import {
   useCallback,
 } from "react";
 import { getBranches } from "@/lib/branches";
+import { getUserBranches } from "@/lib/user-management";
 import type { Branch } from "@/types";
 
 interface BranchContextValue {
@@ -32,8 +33,22 @@ export function BranchProvider({ children }: { children: React.ReactNode }) {
   const reload = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getBranches();
-      setBranches(data);
+      // First, try to get user's assigned branches
+      let displayBranches: Branch[] = [];
+      try {
+        const userBranches = await getUserBranches();
+        displayBranches = userBranches as Branch[];
+      } catch {
+        // If user branches fails, try to get all branches (for admins)
+        try {
+          displayBranches = await getBranches();
+        } catch {
+          // If both fail, stay empty
+          displayBranches = [];
+        }
+      }
+      
+      setBranches(displayBranches);
 
       // Restore previously selected branch, or default to first
       const savedId =
@@ -42,10 +57,10 @@ export function BranchProvider({ children }: { children: React.ReactNode }) {
           : null;
 
       const restored = savedId
-        ? data.find((b) => b.id === savedId) ?? null
+        ? displayBranches.find((b) => b.id === savedId) ?? null
         : null;
 
-      setSelectedBranchState(restored ?? data[0] ?? null);
+      setSelectedBranchState(restored ?? displayBranches[0] ?? null);
     } catch {
       // silently fail; branch context just stays empty
     } finally {

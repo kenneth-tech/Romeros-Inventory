@@ -14,6 +14,7 @@ export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState<"staff" | "admin">("staff");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,6 +48,7 @@ export default function SignUpPage() {
           first_name: validation.value.firstName,
           last_name: validation.value.lastName,
           full_name: validation.value.fullName,
+          role: role,
         },
         emailRedirectTo: `${window.location.origin}/dashboard`,
       },
@@ -118,6 +120,25 @@ export default function SignUpPage() {
                 className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Romero"
               />
+            </div>
+
+            <div>
+              <label
+                htmlFor="role"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Account Type
+              </label>
+              <select
+                id="role"
+                required
+                value={role}
+                onChange={(event) => setRole(event.target.value as "staff" | "admin")}
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="staff">Staff</option>
+                <option value="admin">Admin</option>
+              </select>
             </div>
 
             <div>
