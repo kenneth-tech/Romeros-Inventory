@@ -8,9 +8,7 @@ export async function POST(request: NextRequest) {
     // Check if user is authenticated and is admin
     const {
       data: { user: authUser },
-    } = await supabase.auth.admin.getUser(
-      request.headers.get("authorization")?.replace("Bearer ", "") || ""
-    );
+    } = await supabase.auth.getUser();
 
     if (!authUser) {
       return NextResponse.json(
