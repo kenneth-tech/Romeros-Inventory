@@ -180,7 +180,7 @@ export default function StockOutForm({ parts, branchId, onSuccess }: StockOutFor
                         onChange={(e) =>
                           updateLineItemQuantity(item.id, Number(e.target.value))
                         }
-                        className="w-16 px-2 py-1 border border-gray-300 rounded text-sm"
+                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm text-gray-900 font-medium"
                       />
                       <span className="text-xs text-gray-500">
                         (Available: {part?.stock})

@@ -15,6 +15,7 @@ import {
   ChevronsUpDown,
 } from "lucide-react";
 import PartModal from "@/components/PartModal";
+import CategoryFilter from "@/components/CategoryFilter";
 import {
   getParts,
   addPart,
@@ -181,15 +182,13 @@ export default function PartsPage() {
             className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
-        <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="px-3 py-2.5 rounded-lg border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[160px]"
-        >
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>{cat === "All" ? "All Categories" : cat}</option>
-          ))}
-        </select>
+        <div className="sm:w-[200px]">
+          <CategoryFilter
+            categories={categories}
+            selectedCategory={categoryFilter}
+            onChange={setCategoryFilter}
+          />
+        </div>
       </div>
 
       {/* Error */}
