@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { getHistory, type MovementWithPart } from "@/lib/stock";
 import { useBranch } from "@/context/BranchContext";
+import TypeFilter from "@/components/TypeFilter";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const PAGE_SIZE = 50;
 
@@ -67,7 +69,9 @@ export default function HistoryPage() {
   }, [selectedBranch, typeFilter, from, to, search]);
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-5">
+    <>
+      {loading && <LoadingSpinner />}
+      <div className="p-6 max-w-6xl mx-auto space-y-5">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Transaction History</h1>
@@ -96,16 +100,7 @@ export default function HistoryPage() {
           <div className="flex flex-wrap gap-3 items-end">
             {/* Type */}
             <div className="flex items-center gap-1.5">
-              <Filter className="w-4 h-4 text-gray-400 shrink-0" />
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value as "" | "IN" | "OUT")}
-                className={inputClass}
-              >
-                <option value="">All types</option>
-                <option value="IN">Stock In</option>
-                <option value="OUT">Stock Out</option>
-              </select>
+              <TypeFilter selectedType={typeFilter} onChange={setTypeFilter} />
             </div>
 
             {/* Date range */}
@@ -254,6 +249,7 @@ export default function HistoryPage() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

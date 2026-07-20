@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -36,7 +37,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <>
+      {loading && <LoadingSpinner />}
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
         {/* Logo / Header */}
         <div className="text-center mb-8">
@@ -140,6 +143,7 @@ export default function LoginPage() {
           Romeros Car Aircon &mdash; Internal System
         </p>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

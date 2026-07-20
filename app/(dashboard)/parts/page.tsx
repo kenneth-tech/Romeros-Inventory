@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import PartModal from "@/components/PartModal";
 import CategoryFilter from "@/components/CategoryFilter";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import {
   getParts,
   addPart,
@@ -135,7 +136,9 @@ export default function PartsPage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-5">
+    <>
+      {loading && <LoadingSpinner />}
+      <div className="p-6 max-w-7xl mx-auto space-y-5">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -323,5 +326,6 @@ export default function PartsPage() {
         onSave={handleSave}
       />
     </div>
+    </>
   );
 }

@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import StockInForm from "@/components/StockInForm";
 import StockOutForm from "@/components/StockOutForm";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { getMovements, type MovementWithPart } from "@/lib/stock";
 import { getParts } from "@/lib/parts";
 import { useBranch } from "@/context/BranchContext";
@@ -23,6 +24,7 @@ export default function StockPage() {
   const [parts, setParts] = useState<Part[]>([]);
   const [movements, setMovements] = useState<MovementWithPart[]>([]);
   const [loadingMovements, setLoadingMovements] = useState(true);
+  const [loadingParts, setLoadingParts] = useState(true);
 
   const loadMovements = useCallback(async (type: Tab) => {
     if (!selectedBranch) return;
@@ -37,7 +39,8 @@ export default function StockPage() {
 
   useEffect(() => {
     if (selectedBranch) {
-      getParts(selectedBranch.id).then(setParts).catch(console.error);
+      setLoadingParts(true);
+      getParts(selectedBranch.id).then(setParts).catch(console.error).finally(() => setLoadingParts(false));
     }
   }, [selectedBranch]);
 
@@ -51,7 +54,9 @@ export default function StockPage() {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
+    <>
+      {(loadingMovements || loadingParts) && <LoadingSpinner />}
+      <div className="p-6 max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Stock Movement</h1>
@@ -148,6 +153,7 @@ export default function StockPage() {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

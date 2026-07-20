@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Users, Edit2, Trash2, Plus, Save, X, ChevronLeft } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { getAllUsersWithBranches, updateUserRole, assignBranchesToUser, deleteUser, updateUserName } from "@/lib/user-management";
 import { getBranches } from "@/lib/branches";
 import type { Branch } from "@/types";
@@ -100,7 +101,9 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <>
+      {loading && <LoadingSpinner />}
+      <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="mb-4">
         <Link
@@ -327,6 +330,7 @@ export default function AdminUsersPage() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

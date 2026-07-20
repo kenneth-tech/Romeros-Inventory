@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FileBarChart, RefreshCw, Download } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { calculateMonthlyReport, saveReportMetadata, getDailyMonthlyReport } from "@/lib/reports";
 import { exportMonthlyReport } from "@/lib/excel";
 import { exportDailyMonthlyReport } from "@/lib/exportSnapshot";
@@ -53,7 +54,9 @@ export default function ReportsPage() {
   const totalUsed = rows.reduce((s, r) => s + r.used_sold, 0);
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <>
+      {loading && <LoadingSpinner />}
+      <div className="p-6 max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Monthly Report</h1>
@@ -217,6 +220,7 @@ export default function ReportsPage() {
         </div>
       )}
     </div>
+    </>
   );
 }
 

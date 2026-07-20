@@ -6,6 +6,7 @@ import { FormEvent, useState } from "react";
 import { Eye, EyeOff, Lock, Mail, UserPlus } from "lucide-react";
 import { validateSignUpForm } from "@/lib/auth-validation";
 import { createClient } from "@/lib/supabase";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -72,7 +73,9 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
+    <>
+      {loading && <LoadingSpinner />}
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-600 rounded-2xl mb-4">
@@ -267,6 +270,7 @@ export default function SignUpPage() {
           Romeros Car Aircon &mdash; Internal System
         </p>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
