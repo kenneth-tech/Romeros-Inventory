@@ -52,6 +52,8 @@ export default function HistoryPage() {
       });
       setRows(result.data);
       setTotal(result.total);
+      // Ensure spinner shows for at least 1 second
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } catch {
       setError("Failed to load history.");
     } finally {

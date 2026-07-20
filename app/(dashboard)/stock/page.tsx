@@ -32,6 +32,8 @@ export default function StockPage() {
     try {
       const data = await getMovements(selectedBranch.id, type === "in" ? "IN" : "OUT");
       setMovements(data);
+      // Ensure spinner shows for at least 1 second
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } finally {
       setLoadingMovements(false);
     }

@@ -43,6 +43,9 @@ export default function ReportsPage() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) await saveReportMetadata(month, year, selectedBranch.id, user.id);
+      
+      // Ensure spinner shows for at least 1 second
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to generate report.");
     } finally {

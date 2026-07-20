@@ -44,6 +44,8 @@ export default function AdminUsersPage() {
       ]);
       setUsers(usersData);
       setBranches(branchesData);
+      // Ensure spinner shows for at least 1 second
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
     } finally {

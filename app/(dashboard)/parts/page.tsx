@@ -55,6 +55,8 @@ export default function PartsPage() {
     try {
       const data = await getParts(selectedBranch.id);
       setParts(data);
+      // Ensure spinner shows for at least 1 second
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } catch {
       setError("Failed to load parts.");
     } finally {

@@ -61,6 +61,9 @@ export default function SignUpPage() {
       return;
     }
 
+    // Ensure spinner shows for at least 1 second
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     if (data.session) {
       router.push("/dashboard");
       router.refresh();

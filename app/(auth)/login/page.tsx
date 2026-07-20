@@ -32,6 +32,8 @@ export default function LoginPage() {
       return;
     }
 
+    // Ensure spinner shows for at least 1 second
+    await new Promise(resolve => setTimeout(resolve, 1000));
     router.push("/dashboard");
     router.refresh();
   }
